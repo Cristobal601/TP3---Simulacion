@@ -103,7 +103,7 @@ def tiempo_minimo_teorico(p):
     b_min = min(p["B"]["val"])
     f_min = min(p["F"]["val"])
     d_min = p["D"]["min"]
-    e_min = 0.0  # la exponencial no tiene cota inferior positiva: ínfimo teórico = 0
+    e_min = 0.0  # la exponencial 
     ruta_producto = p["A"] + b_min
     ruta_empaque = p["C"] + d_min + e_min
     return max(ruta_producto, ruta_empaque) + f_min
