@@ -11,7 +11,7 @@ Para ejecutarlo:  python tp3_simulacion_gui.py
 """
 
 import tkinter as tk
-from tkinter import ttk
+from tkinter import ttk, messagebox
 
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
@@ -337,12 +337,53 @@ class AplicacionTP3:
     # -----------------------------------------------------------------
     def leer_parametros(self):
         v = {k: var.get() for k, var in self.vars.items()}
+     # -------------------------------------------------------------
+    # VALIDACIÓN DEL LEGAJO / MÓDULO
+    # Debe ser un número entero positivo mayor que cero.
+    # -------------------------------------------------------------
+        if not v["legajo"].isdigit():
+            messagebox.showwarning(
+                "Dato inválido",
+                "El legajo debe ser un número entero positivo, sin letras ni decimales."
+            )
+            return None
+
+        legajo = int(v["legajo"])
+
+        if legajo <= 0:
+            messagebox.showwarning(
+                "Dato inválido",
+                "El legajo debe ser mayor que 0."
+            )
+            return None
+
+        # -------------------------------------------------------------
+        # VALIDACIÓN DE N ITERACIONES
+        # Debe ser un número entero positivo mayor que cero.
+        # -------------------------------------------------------------
+        if not v["nIter"].isdigit():
+            messagebox.showwarning(
+                "Dato inválido",
+                "La cantidad de iteraciones debe ser un número entero positivo, sin letras ni decimales."
+            )
+            return None
+
+        n_iter = int(v["nIter"])
+
+        if n_iter <= 0:
+            messagebox.showwarning(
+                "Dato inválido",
+                "La cantidad de iteraciones debe ser mayor que 0."
+            )
+            return None
+
+        # Para el resto de los campos se mantiene el funcionamiento original.
         num = lambda k: float(v[k])
         entero = lambda k: int(round(num(k)))
 
         return {
-            "m": entero("legajo"),
-            "n": max(1, entero("nIter")),
+            "m": legajo,
+            "n": n_iter,
             "genB": {"sem": entero("semB"), "a": entero("aB"), "c": entero("cB")},
             "genD": {"sem": entero("semD"), "a": entero("aD"), "c": entero("cD")},
             "genE": {"sem": entero("semE"), "a": entero("aE"), "c": entero("cE")},
@@ -362,6 +403,9 @@ class AplicacionTP3:
     # -----------------------------------------------------------------
     def simular_click(self):
         p = self.leer_parametros()
+        if p is None:
+            return
+        
         r = simular_n(p)
         self._mostrar_resultados(p, r)
         self._actualizar_graficos(p, r)

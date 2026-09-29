@@ -11,7 +11,7 @@ Para ejecutarlo:  python tp3_simulacion_gui.py
 """
 
 import tkinter as tk
-from tkinter import ttk
+from tkinter import ttk, messagebox
 
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
@@ -338,11 +338,65 @@ class AplicacionTP3:
     # -----------------------------------------------------------------
     def leer_parametros(self):
         v = {k: var.get() for k, var in self.vars.items()}
+        # ==========================================================
+        # VALIDACIÓN DE N ITERACIONES
+        # Debe ser un entero mayor que 0
+        # ==========================================================
+        if not v["nIter"].isdigit():
+            messagebox.showwarning(
+                "Dato inválido",
+                "La cantidad de iteraciones debe ser un número entero positivo, "
+                "sin letras ni decimales."
+            )
+            return None
+
+        n_iter = int(v["nIter"])
+
+        if n_iter <= 0:
+            messagebox.showwarning(
+                "Dato inválido",
+                "La cantidad de iteraciones debe ser mayor que 0."
+            )
+            return None
+
+        # ==========================================================
+        # VALIDACIÓN DE LOS MÓDULOS
+        # mB, mD, mE y mF deben ser enteros mayores que 0
+        # ==========================================================
+        modulos = {
+            "mB": "B",
+            "mD": "D",
+            "mE": "E",
+            "mF": "F",
+        }
+
+        for clave, variable in modulos.items():
+
+            if not v[clave].isdigit():
+                messagebox.showwarning(
+                    "Dato inválido",
+                    f"El módulo m de la variable {variable} debe ser un número "
+                    f"entero positivo, sin letras ni decimales."
+                )
+                return None
+
+            modulo = int(v[clave])
+
+            if modulo <= 0:
+                messagebox.showwarning(
+                    "Dato inválido",
+                    f"El módulo m de la variable {variable} debe ser mayor que 0."
+                )
+                return None
+
+        # ==========================================================
+        # RESTO DE LOS PARÁMETROS
+        # ==========================================================
         num = lambda k: float(v[k])
         entero = lambda k: int(round(num(k)))
 
         return {
-            "n": max(1, entero("nIter")),
+            "n": n_iter,
             "genB": {"sem": entero("semB"), "a": entero("aB"), "c": entero("cB"), "m": entero("mB")},
             "genD": {"sem": entero("semD"), "a": entero("aD"), "c": entero("cD"), "m": entero("mD")},
             "genE": {"sem": entero("semE"), "a": entero("aE"), "c": entero("cE"), "m": entero("mE")},
@@ -362,6 +416,9 @@ class AplicacionTP3:
     # -----------------------------------------------------------------
     def simular_click(self):
         p = self.leer_parametros()
+        if p is None:
+            return
+        
         r = simular_n(p)
         self._mostrar_resultados(p, r)
         self._actualizar_graficos(p, r)
@@ -422,6 +479,9 @@ class AplicacionTP3:
     # -----------------------------------------------------------------
     def simular99_click(self):
         p = self.leer_parametros()
+        if p is None:
+            return
+        
         r99 = simular_99(p)
         texto = (
             f"Tiempo a fijar (95% de confianza): {r99['percentil95']:.2f} min\n"
